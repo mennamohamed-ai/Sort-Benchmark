@@ -29,25 +29,25 @@ public class ParallelMergeSort implements SortAlgorithm {
         this(threshold, 0);
     }
 
-    public ParallelMergeSort() {
-        this(10_000, 0);
-    }
-
     @Override
     public void sort(int[] array) {
         if (array == null || array.length <= 1) return;
         int[] aux = Arrays.copyOf(array, array.length);
-        pool.invoke(new MergeSortTask(array, aux, 0, array.length - 1, threshold));
+        pool.invoke(createMergeSortTask(array, aux, 0, array.length - 1, threshold));
     }
 
-    private static class MergeSortTask extends RecursiveAction {
-        private final int[] a;
-        private final int[] aux;
-        private final int left;
-        private final int right;
-        private final int threshold;
+    protected MergeSortTask createMergeSortTask(int[] array, int[] aux, int left, int right, int threshold) {
+        return new MergeSortTask(array, aux, left, right, threshold);
+    }
 
-        MergeSortTask(int[] a, int[] aux, int left, int right, int threshold) {
+    protected static class MergeSortTask extends RecursiveAction {
+        protected final int[] a;
+        protected final int[] aux;
+        protected final int left;
+        protected final int right;
+        protected final int threshold;
+
+        public MergeSortTask(int[] a, int[] aux, int left, int right, int threshold) {
             this.a = a;
             this.aux = aux;
             this.left = left;
@@ -73,7 +73,7 @@ public class ParallelMergeSort implements SortAlgorithm {
             merge(a, aux, left, mid, right);
         }
 
-        private void sequentialMergeSort(int[] a, int[] aux, int left, int right) {
+        protected void sequentialMergeSort(int[] a, int[] aux, int left, int right) {
             if (left >= right) return;
             int mid = left + (right - left) / 2;
             sequentialMergeSort(a, aux, left, mid);
@@ -82,7 +82,7 @@ public class ParallelMergeSort implements SortAlgorithm {
             merge(a, aux, left, mid, right);
         }
 
-        private void merge(int[] a, int[] aux, int left, int mid, int right) {
+        protected void merge(int[] a, int[] aux, int left, int mid, int right) {
             System.arraycopy(a, left, aux, left, right - left + 1);
             int i = left;
             int j = mid + 1;

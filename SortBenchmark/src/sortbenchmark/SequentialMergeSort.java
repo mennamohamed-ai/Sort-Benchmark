@@ -18,7 +18,7 @@ public class SequentialMergeSort implements SortAlgorithm {
     }
 
     // inclusive bounds
-    private void mergeSort(int[] a, int[] aux, int left, int right) {
+    protected void mergeSort(int[] a, int[] aux, int left, int right) {
         if (left >= right) return;
         int mid = left + (right - left) / 2;
         mergeSort(a, aux, left, mid);
@@ -28,7 +28,7 @@ public class SequentialMergeSort implements SortAlgorithm {
         merge(a, aux, left, mid, right);
     }
 
-    private void merge(int[] a, int[] aux, int left, int mid, int right) {
+    protected void merge(int[] a, int[] aux, int left, int mid, int right) {
         // copy to aux
         System.arraycopy(a, left, aux, left, right - left + 1);
         int i = left;

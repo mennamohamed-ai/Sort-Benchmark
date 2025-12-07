@@ -1,8 +1,8 @@
-
 package sortbenchmark;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.Arrays;
 import java.util.Random;
 
 public class MergeSortVisualizer extends JPanel {
@@ -34,53 +34,76 @@ public class MergeSortVisualizer extends JPanel {
 
     public void startSort() {
         new Thread(() -> {
-            try {
-                mergeSort(0, array.length - 1);
-                highlight1 = highlight2 = -1;
-                repaint();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            // Use SequentialMergeSort with visualization - extends SequentialMergeSort to use its methods
+            SequentialMergeSortVisualizable sorter = new SequentialMergeSortVisualizable(this);
+            sorter.sort(array);
+            highlight1 = highlight2 = -1;
+            repaint();
         }).start();
     }
 
-    // Public function: merge sort for visualization
-    public void mergeSort(int left, int right) throws InterruptedException {
-        if (left >= right) return;
-        int mid = left + (right - left) / 2;
-        mergeSort(left, mid);
-        mergeSort(mid + 1, right);
-        merge(left, mid, right);
+    public void setHighlight(int i, int j) {
+        highlight1 = i;
+        highlight2 = j;
+        SwingUtilities.invokeLater(() -> repaint());
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
     }
 
-    private void merge(int left, int mid, int right) throws InterruptedException {
-        System.arraycopy(array, left, aux, left, right - left + 1);
-        int i = left, j = mid + 1, k = left;
-        while (i <= mid && j <= right) {
-            highlight1 = i;
-            highlight2 = j;
-            repaint();
-            Thread.sleep(delay);
-            if (aux[i] <= aux[j]) array[k++] = aux[i++];
-            else array[k++] = aux[j++];
+    // Sequential Merge Sort with Visualization - extends SequentialMergeSort to use its protected methods
+    private static class SequentialMergeSortVisualizable extends SequentialMergeSort {
+        private final MergeSortVisualizer visualizer;
+
+        public SequentialMergeSortVisualizable(MergeSortVisualizer visualizer) {
+            this.visualizer = visualizer;
         }
-        while (i <= mid) {
-            highlight1 = i;
-            highlight2 = -1;
-            repaint();
-            Thread.sleep(delay);
-            array[k++] = aux[i++];
+
+        @Override
+        public void sort(int[] array) {
+            if (array == null || array.length <= 1) return;
+            int[] aux = Arrays.copyOf(array, array.length);
+            mergeSort(array, aux, 0, array.length - 1);
         }
-        while (j <= right) {
-            highlight1 = j;
-            highlight2 = -1;
-            repaint();
-            Thread.sleep(delay);
-            array[k++] = aux[j++];
+
+        // Override mergeSort to add visualization - uses parent's logic
+        @Override
+        protected void mergeSort(int[] a, int[] aux, int left, int right) {
+            if (left >= right) return;
+            int mid = left + (right - left) / 2;
+            mergeSort(a, aux, left, mid);
+            mergeSort(a, aux, mid + 1, right);
+            // skip merge if already ordered (same optimization as SequentialMergeSort)
+            if (a[mid] <= a[mid + 1]) return;
+            merge(a, aux, left, mid, right);
         }
-        highlight1 = highlight2 = -1;
-        repaint();
-        Thread.sleep(delay);
+
+        // Override merge to add visualization - uses parent's logic with visualization
+        @Override
+        protected void merge(int[] a, int[] aux, int left, int mid, int right) {
+            // Use parent's merge logic but add visualization
+            System.arraycopy(a, left, aux, left, right - left + 1);
+            int i = left;
+            int j = mid + 1;
+            int k = left;
+            while (i <= mid && j <= right) {
+                // Visualization: highlight elements being compared
+                visualizer.setHighlight(i, j);
+                if (aux[i] <= aux[j]) a[k++] = aux[i++];
+                else a[k++] = aux[j++];
+            }
+            while (i <= mid) {
+                visualizer.setHighlight(i, -1);
+                a[k++] = aux[i++];
+            }
+            while (j <= right) {
+                visualizer.setHighlight(j, -1);
+                a[k++] = aux[j++];
+            }
+            visualizer.setHighlight(-1, -1);
+        }
     }
 
     // Main method to run the GUI independently

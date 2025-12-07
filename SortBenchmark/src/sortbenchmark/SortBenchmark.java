@@ -2,6 +2,7 @@ package sortbenchmark;
 
 import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
+import javax.swing.JFrame;
 
 public class SortBenchmark {
 
@@ -9,9 +10,6 @@ public class SortBenchmark {
     private int threshold;
     private int runs;
     private String pattern;
-
-    private static final int[] DEFAULT_SIZES = {10_000, 100_000, 1_000_000};
-    private static final int DEFAULT_RUNS = 5;
 
     // Constructor for GUI
     public SortBenchmark(int size, int threshold, int runs, String pattern) {
@@ -108,31 +106,82 @@ public class SortBenchmark {
         return sb.toString();
     }
 
-    // For Console execution
+    // For Console execution with user input
     public void runConsole() {
-        int threshold = 10_000;
-        int parallelism = Runtime.getRuntime().availableProcessors();
-
+        java.util.Scanner scanner = new java.util.Scanner(System.in);
+        
+        System.out.println("-----------------------------------------");
         System.out.println("Parallel Merge Sort Benchmark");
-        System.out.printf("Default threshold=%d, parallelism=%d cores%n%n", threshold, parallelism);
-
-        for (int size : DEFAULT_SIZES) {
-            System.out.println("=== Array Size: " + size + " ===");
-            runForPatternConsole(size, "Random", threshold, parallelism);
-            runForPatternConsole(size, "Reverse", threshold, parallelism);
-            System.out.println();
-        }
-    }
-
-    private void runForPatternConsole(int size, String pattern, int threshold, int parallelism) {
-        SortBenchmark sb = new SortBenchmark(size, threshold, DEFAULT_RUNS, pattern);
+        System.out.println("-----------------------------------------\n");
+        
+        int parallelism = Runtime.getRuntime().availableProcessors();
+        System.out.printf("Detected %d CPU cores%n%n", parallelism);
+        
+        // Get array size
+        System.out.print("Enter array size: ");
+        int size = scanner.nextInt();
+        
+        // Get threshold
+        System.out.print("Enter threshold: ");
+        int threshold = scanner.nextInt();
+        
+        // Get number of runs
+        System.out.print("Enter number of runs: ");
+        int runs = scanner.nextInt();
+        
+        // Get pattern
+        System.out.print("Enter pattern (Random/Reverse): ");
+        String pattern = scanner.next().trim();
+        
+        // Automatically show parallel sort visualization with user's input
+        showParallelVisualization(size, threshold);
+        
+        System.out.println("\n" + "=".repeat(40));
+        System.out.println("Running benchmark...");
+        System.out.println("=".repeat(40) + "\n");
+        
+        // Run benchmark
+        SortBenchmark sb = new SortBenchmark(size, threshold, runs, pattern);
         System.out.print(sb.run());
+        
+        scanner.close();
     }
+    
 
     private int[] generateBase(int size, String pattern) {
         if ("Reverse".equalsIgnoreCase(pattern)) return ArrayGenerator.reverseSortedArray(size);
-        if ("Sorted".equalsIgnoreCase(pattern)) return ArrayGenerator.sortedArray(size);
         return ArrayGenerator.randomArray(size);
+    }
+
+    // Show parallel merge sort visualization with user's input
+    private void showParallelVisualization(int size, int threshold) {
+        // Limit size for visualization (too large arrays won't visualize well)
+        int vizSize = Math.min(size, 100); // Max 100 elements for visualization
+        
+        javax.swing.SwingUtilities.invokeLater(() -> {
+            JFrame frame = new JFrame("Parallel Merge Sort Visualization - Size: " + size + ", Threshold: " + threshold);
+            ParallelMergeSortVisualizer panel = new ParallelMergeSortVisualizer(vizSize, threshold);
+            frame.add(panel);
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            
+            // Ensure window is not minimized and appears on top
+            frame.setExtendedState(JFrame.NORMAL);
+            frame.setAlwaysOnTop(true);
+            frame.toFront();
+            frame.requestFocus();
+            frame.setVisible(true);
+            
+            // Remove always on top after showing
+            frame.setAlwaysOnTop(false);
+            
+            // Start sorting after window is visible
+            panel.startSort();
+        });
+        
+        System.out.println("Opening Parallel Merge Sort Visualization window...");
+        System.out.println("(Visualization shows " + vizSize + " elements for better performance)\n");
     }
 
     private String formatNano(long nanos) {
@@ -141,31 +190,16 @@ public class SortBenchmark {
         double sec = nanos / 1_000_000_000.0;
         return ms + " ms (" + String.format("%.3f", sec) + " s)";
     }
-
-    public void testSortingEmployees() {
-    System.out.println("\n--- Employee Sorting  ---");
-
-    Employee[] employees = {
-        new Employee("Ali", 30, 5000),
-        new Employee("Sara", 25, 7000),
-        new Employee("Mona", 28, 6500),
-        new Employee("Omar", 35, 4500)
-    };
-
-    System.out.println("Before sorting:");
-    for (Employee e : employees) System.out.println(e);
-
-    GenericSequentialMergeSort<Employee> sorter = new GenericSequentialMergeSort<>();
-    sorter.sort(employees, new EmployeeSalaryComparator());
-
-    System.out.println("\nAfter sorting by salary:");
-    for (Employee e : employees) System.out.println(e);
-}
-
-    // Main method for console
+    
+    // Main method - choose between GUI and Console
     public static void main(String[] args) {
-        new SortBenchmark().runConsole();
-        new SortBenchmark().testSortingEmployees();
+        if (args.length > 0 && args[0].equalsIgnoreCase("gui")) {
+            // Run GUI mode
+            GUI.main(args);
+        } else {
+            // Run console with user input (default)
+            new SortBenchmark().runConsole();
+        }
     }
 }
 
