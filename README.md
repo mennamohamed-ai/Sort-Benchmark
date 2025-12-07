@@ -41,19 +41,21 @@ The application includes both a graphical user interface (GUI) and console-based
 SortBenchmark/
 ├── src/
 │   └── sortbenchmark/
-│       ├── SortBenchmark.java          # Main benchmark orchestrator
-│       ├── GUI.java                    # Swing GUI for benchmarks
-│       ├── SortAlgorithm.java          # Interface for sorting algorithms
-│       ├── SequentialMergeSort.java    # Sequential merge sort implementation
-│       ├── ParallelMergeSort.java      # Parallel merge sort with Fork/Join
-│       ├── GenericSequentialMergeSort.java  # Generic merge sort for objects
-│       ├── ArrayGenerator.java         # Array generation utilities
-│       ├── MergeSortVisualizer.java    # Visual sorting demonstration
-│       ├── Employee.java               # Example custom object
-│       └── EmployeeSalaryComparator.java  # Comparator for Employee sorting
-├── build/                              # Compiled classes
-├── nbproject/                          # NetBeans project configuration
-└── README.md                           # This file
+│       ├── SortBenchmark.java              # Main benchmark orchestrator
+│       ├── GUI.java                        # Swing GUI for benchmarks
+│       ├── SortAlgorithm.java              # Interface for sorting algorithms
+│       ├── SequentialMergeSort.java        # Sequential merge sort implementation
+│       ├── ParallelMergeSort.java          # Parallel merge sort with Fork/Join
+│       ├── GenericSequentialMergeSort.java # Generic sequential merge sort for objects
+│       ├── GenericParallelMergeSort.java   # Generic parallel merge sort for objects
+│       ├── ArrayGenerator.java             # Array generation utilities
+│       ├── MergeSortVisualizer.java        # Sequential merge sort visualization
+│       ├── ParallelMergeSortVisualizer.java # Parallel merge sort visualization
+│       ├── Employee.java                   # Example custom object
+│       └── TestEmployeeSorting.java        # Test for generic sorting on Employee objects
+├── build/                                  # Compiled classes
+├── nbproject/                              # NetBeans project configuration
+└── README.md                               # This file
 ```
 
 ## 🔧 Components
@@ -68,8 +70,8 @@ The main benchmark class that:
 
 **Key Methods:**
 - `run()`: Executes benchmark and returns formatted results (for GUI)
-- `runConsole()`: Runs default benchmark suite (for console)
-- `testSortingEmployees()`: Demonstrates generic sorting with Employee objects
+- `runConsole()`: Interactive console mode with user input for all parameters
+- `showParallelVisualization()`: Automatically launches parallel sort visualization
 
 ### 2. GUI.java
 Swing-based graphical interface featuring:
@@ -101,29 +103,46 @@ Parallel merge sort using Java's Fork/Join framework:
 - Efficient task splitting and merging
 
 ### 5. GenericSequentialMergeSort.java
-Generic merge sort implementation for any comparable type:
+Generic sequential merge sort implementation for any comparable type:
 - Works with any object type using `Comparator<T>`
 - Demonstrates sorting custom objects (Employee)
 - Same algorithmic optimizations as primitive version
 
-### 6. ArrayGenerator.java
+### 6. GenericParallelMergeSort.java
+Generic parallel merge sort using Fork/Join framework:
+- Works with any object type using `Comparator<T>`
+- Configurable threshold for switching to sequential sorting
+- Uses `RecursiveAction` for parallel task execution
+- Demonstrates parallel sorting of custom objects
+
+### 7. ArrayGenerator.java
 Utility class for generating test arrays:
 - `randomArray(size)`: Generates random integer arrays
 - `sortedArray(size)`: Generates pre-sorted arrays
 - `reverseSortedArray(size)`: Generates reverse-sorted arrays
 - `copy(array)`: Safe array copying
 
-### 7. MergeSortVisualizer.java
-Visual demonstration of merge sort algorithm:
+### 8. MergeSortVisualizer.java
+Visual demonstration of sequential merge sort algorithm:
 - Animated bar chart representation
 - Highlights elements being compared/merged
+- Uses core SequentialMergeSort implementation
 - Configurable delay for visualization speed
 - Standalone executable component
 
-### 8. Employee.java & EmployeeSalaryComparator.java
+### 9. ParallelMergeSortVisualizer.java
+Visual demonstration of parallel merge sort algorithm:
+- Animated bar chart representation
+- Highlights elements being compared/merged during parallel execution
+- Uses core ParallelMergeSort implementation
+- Automatically launched from console mode
+- Shows parallel divide-and-conquer process
+
+### 10. Employee.java & TestEmployeeSorting.java
 Example custom objects demonstrating generic sorting:
 - Employee class with name, age, and salary
-- Comparator for sorting by salary
+- TestEmployeeSorting: Performance comparison between GenericSequentialMergeSort and GenericParallelMergeSort
+- Uses lambda expressions for Comparator (no separate Comparator class needed)
 - Demonstrates real-world sorting use cases
 
 ## 🚀 Usage
@@ -150,23 +169,68 @@ Example custom objects demonstrating generic sorting:
 
 ### Console Mode
 
-Run the console benchmark:
+Run the console benchmark with interactive input:
 ```bash
 java -cp build/classes sortbenchmark.SortBenchmark
 ```
 
-This executes a predefined benchmark suite with:
-- Array sizes: 10,000, 100,000, 1,000,000
-- Patterns: Random and Reverse
-- Default threshold: 10,000
-- 5 runs per configuration
+The console mode will prompt you to enter:
+- **Array Size**: Number of elements to sort
+- **Threshold**: Minimum array size for parallel sorting
+- **Number of Runs**: How many times to run the benchmark
+- **Pattern**: Data distribution (Random/Reverse/Sorted)
+
+After entering parameters, the benchmark will:
+1. Automatically launch parallel sort visualization window
+2. Run the benchmark with your specified parameters
+3. Display detailed results with timing comparisons
+
+**Example Console Session:**
+```
+========================================
+Parallel Merge Sort Benchmark
+========================================
+
+Detected 8 CPU cores
+
+Enter array size: 100000
+Enter threshold: 10000
+Enter number of runs: 5
+Enter pattern (Random/Reverse/Sorted): Random
+
+Opening Parallel Merge Sort Visualization window...
+(Visualization shows 100 elements for better performance)
+
+========================================
+Running benchmark...
+========================================
+...
+```
 
 ### Visualization Mode
 
-Run the merge sort visualizer:
+Run the merge sort visualizers:
+
+**Sequential Merge Sort Visualizer:**
 ```bash
 java -cp build/classes sortbenchmark.MergeSortVisualizer
 ```
+
+**Parallel Merge Sort Visualizer:**
+```bash
+java -cp build/classes sortbenchmark.ParallelMergeSortVisualizer
+```
+
+**Note:** The parallel visualizer is automatically launched when running console mode with user input.
+
+### Generic Sorting Test
+
+Test generic sorting on Employee objects:
+```bash
+java -cp build/classes sortbenchmark.TestEmployeeSorting
+```
+
+This will compare performance of GenericSequentialMergeSort vs GenericParallelMergeSort on Employee arrays.
 
 ## 📊 Algorithms
 
