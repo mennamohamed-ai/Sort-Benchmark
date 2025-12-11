@@ -1,12 +1,14 @@
-
 package sortbenchmark;
+
+import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+
 public class GUI extends javax.swing.JFrame {
 
     public GUI() {
         initComponents();
     }
 
-  
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
@@ -270,8 +272,6 @@ public class GUI extends javax.swing.JFrame {
 
     }//GEN-LAST:event_jButton1ActionPerformed
 
-
-
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -297,10 +297,10 @@ public class GUI extends javax.swing.JFrame {
         //</editor-fold>
 
         java.awt.EventQueue.invokeLater(() -> {
-        GUI gui = new GUI();
-        gui.setLocationRelativeTo(null); // Center window
-        gui.setVisible(true);
-         });
+            GUI gui = new GUI();
+            gui.setLocationRelativeTo(null); // Center window
+            gui.setVisible(true);
+        });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
@@ -324,29 +324,46 @@ public class GUI extends javax.swing.JFrame {
     private javax.swing.JTextField jTextField4;
     // End of variables declaration//GEN-END:variables
 
+    private void startBenchmark() {
+        try {
+            int size = Integer.parseInt(jTextField1.getText());
+            int threshold = Integer.parseInt(jTextField2.getText());
+            int runs = Integer.parseInt(jTextField4.getText());
+            String pattern = jComboBox1.getSelectedItem().toString().trim();
 
-private void startBenchmark() {
-    try {
-        int size = Integer.parseInt(jTextField1.getText());
-        int threshold = Integer.parseInt(jTextField2.getText());
-        int runs = Integer.parseInt(jTextField4.getText());
-        String pattern = jComboBox1.getSelectedItem().toString();
+            jTextArea2.append("Running benchmark...\n");
+            jTextArea2.append("--------------------------------------\n");
 
-        jTextArea2.append("Running benchmark...\n");
-        jTextArea2.append("--------------------------------------\n");
+            int[] base = "Reverse".equalsIgnoreCase(pattern)
+                    ? ArrayGenerator.reverseSortedArray(size)
+                    : ArrayGenerator.randomArray(size);
 
-        new Thread(() -> {
-            SortBenchmark sb = new SortBenchmark(size, threshold, runs, pattern);
-            String result = sb.run();  
-            jTextArea2.append(result);
-            jTextArea2.setCaretPosition(jTextArea2.getDocument().getLength());
-        }).start();
-        
-       
+            int show = Math.min(size, 500);
+            int[] vizArray = java.util.Arrays.copyOf(base, show);
 
-    } catch (Exception e) {
-        jTextArea2.append("Error: Invalid input!\n");
+            ParallelMergeSortVisualizer panel
+                    = new ParallelMergeSortVisualizer(vizArray, threshold);
+
+            SwingUtilities.invokeLater(() -> {
+                JFrame frame = new JFrame("Parallel Merge Sort Visualization");
+                frame.add(panel);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                frame.setVisible(true);
+            });
+
+            new Thread(() -> {
+                SortBenchmark sb
+                        = new SortBenchmark(vizArray.length, threshold, runs, pattern, vizArray, panel);
+                String result = sb.run();
+                jTextArea2.append(result);
+                jTextArea2.setCaretPosition(jTextArea2.getDocument().getLength());
+            }).start();
+
+        } catch (Exception e) {
+            jTextArea2.append("Error: Invalid input!\n");
+        }
     }
-}
 
 }

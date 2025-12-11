@@ -5,9 +5,9 @@ import java.util.Arrays;
 public class TestEmployeeSorting {
 
     public static void main(String[] args) {
-        System.out.println("========================================");
+        System.out.println("----------------------------------------");
         System.out.println("Employee Sorting Performance Test");
-        System.out.println("========================================\n");
+        System.out.println("----------------------------------------\n");
 
         // Pre-defined employee data
         Employee[] employees = {
