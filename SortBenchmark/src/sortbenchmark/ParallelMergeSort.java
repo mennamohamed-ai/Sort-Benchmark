@@ -1,24 +1,14 @@
-
 package sortbenchmark;
 
-// ParallelMergeSort.java
 import java.util.Arrays;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.RecursiveAction;
 
-/**
- * Parallel merge sort using Fork/Join. Uses threshold to switch to sequential sorting.
- */
 public class ParallelMergeSort implements SortAlgorithm {
 
     private final ForkJoinPool pool;
     private final int threshold;
 
-    /**
-     * @param threshold minimal segment length to keep splitting. When segment length <= threshold,
-     *                  sorting is done sequentially.
-     * @param parallelism number of worker threads; if <= 0 uses common pool.
-     */
     public ParallelMergeSort(int threshold, int parallelism) {
         this.threshold = Math.max(1, threshold);
         if (parallelism > 0) this.pool = new ForkJoinPool(parallelism);

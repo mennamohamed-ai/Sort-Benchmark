@@ -1,13 +1,7 @@
-
 package sortbenchmark;
 
-// SequentialMergeSort.java
 import java.util.Arrays;
 
-/**
- * Standard optimized sequential merge sort implementation for int[].
- * Handles edge cases: null, empty, single-element, already sorted, reverse sorted.
- */
 public class SequentialMergeSort implements SortAlgorithm {
 
     @Override
